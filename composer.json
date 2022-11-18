@@ -1,0 +1,14 @@
+{
+    "name": "skiexx/myframework",
+    "description": "My framework",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "skiexx",
+            "email": "codeskiexx@yandex.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

@@ -7,12 +7,11 @@ use Error;
 class Route
 {
     private static array $routes = [];
-
     private static string $prefix = '';
 
-    public static function setPrefix(string $prefix): void
+    public static function setPrefix($value)
     {
-        self::$prefix = $prefix;
+        self::$prefix = $value;
     }
 
     public static function add(string $route, array $action): void
@@ -25,7 +24,7 @@ class Route
     public function start(): void
     {
         $path = explode('?', $_SERVER['REQUEST_URI'])[0];
-        $path = str_replace(self::$prefix, '', $path);
+        $path = substr($path, strlen(self::$prefix) + 1);
 
         if (!array_key_exists($path, self::$routes)) {
             throw new Error('This path does not exist');
@@ -41,6 +40,7 @@ class Route
         if (!method_exists($class, $action)) {
             throw new Error('This method does not exist');
         }
+
 
         call_user_func([new $class, $action]);
     }
