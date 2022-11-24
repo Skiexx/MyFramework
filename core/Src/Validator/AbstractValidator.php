@@ -7,36 +7,35 @@ abstract class AbstractValidator
     protected string $field = '';
     protected $value;
     protected array $args = [];
-    protected string $message = '';
     protected array $messageKeys = [];
+    protected string $message = '';
 
-    public function __construct(string $field, $value, array $args = [], string $message = null)
+    public function __construct(string $fieldName, $value, $args = [], string $message = null)
     {
-        $this->field = $field;
+        $this->field = $fieldName;
         $this->value = $value;
         $this->args = $args;
         $this->message = $message ?? $this->message;
 
         $this->messageKeys = [
-            ':value' => $this->value,
-            ':field' => $this->field,
+            ":value" => $this->value,
+            ":field" => $this->field
         ];
     }
 
-    public function validate(): bool|string
+    public function validate()
     {
-        if ($this->rule()) {
+        if (!$this->rule())
             return $this->messageError();
-        }
         return true;
     }
 
     private function messageError(): string
     {
         foreach ($this->messageKeys as $key => $value) {
-            $this->message = str_replace($key, (string)$value, $this->message);
+            $message = str_replace($key, (string)$value, $this->message);
         }
-        return $this->message;
+        return $message;
     }
 
     abstract public function rule(): bool;

@@ -10,7 +10,7 @@ class Validator
     private array $rules = [];
     private array $messages = [];
 
-    public function __construct (array $fields, array $rules, array $messages = [])
+    public function __construct(array $fields, array $rules, array $messages = [])
     {
         $this->validators = app()->settings->app['validators'] ?? [];
         $this->fields = $fields;
@@ -19,31 +19,33 @@ class Validator
         $this->validate();
     }
 
-    public function validate(): void
+    private function validate(): void
     {
-        foreach ($this->rules as $field => $rule) {
-            $this->validateField($field, $rule);
+        foreach ($this->rules as $fieldName => $fieldValidators) {
+            $this->validateField($fieldName, $fieldValidators);
         }
     }
 
-    private function validateField(string $field, array $fieldValidators): void
+    private function validateField(string $fieldName, array $fieldValidators): void
     {
         foreach ($fieldValidators as $validatorName) {
             $tmp = explode(':', $validatorName);
             [$validatorName, $args] = count($tmp) > 1 ? $tmp : [$validatorName, null];
             $args = isset($args) ? explode(',', $args) : [];
+
             $validatorClass = $this->validators[$validatorName];
             if (!class_exists($validatorClass)) {
                 continue;
             }
+
             $validator = new $validatorClass(
-                $field,
-                $this->fields[$field],
+                $fieldName,
+                $this->fields[$fieldName],
                 $args,
-                $this->messages[$validatorName]
-            );
+                $this->messages[$validatorName]);
+
             if (!$validator->rule()) {
-                $this->errors[$field][] = $validator->validate();
+                $this->errors[$fieldName][] = $validator->validate();
             }
         }
     }

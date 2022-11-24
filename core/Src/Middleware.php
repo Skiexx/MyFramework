@@ -29,15 +29,15 @@ class Middleware
         $this->middlewareCollector = new RouteCollector(new Std(), new MarkBased());
     }
 
-    public function runMiddlewares(string $httpMethod, string $uri): Request
+    public function runMiddlewares(string $httpMethod, string $uri, Request $request): Request
     {
-        $request = new Request();
-        $routeMiddlewares = app()->settings->app['routeMiddleware'];
+        $routeMiddleware = app()->settings->app['routeMiddleware'];
 
         foreach ($this->getMiddlewaresForRoute($httpMethod, $uri) as $middleware) {
             $args = explode(':', $middleware);
-            (new $routeMiddlewares[$args[0]])->handle($request, $args[1] ?? null);
+            $request = (new $routeMiddleware[$args[0]])->handle($request, $args[1]?? null) ?? $request;
         }
+
         return $request;
     }
 
@@ -45,5 +45,22 @@ class Middleware
     {
         $dispatcher = new Dispatcher($this->middlewareCollector->getData());
         return $dispatcher->dispatch($httpMethod, $uri)[1] ?? [];
+    }
+
+    public function go(string $httpMethod, string $uri, Request $request): Request
+    {
+        return $this->runMiddlewares($httpMethod, $uri, $this->runAppMiddlewares($request));
+    }
+
+    private function runAppMiddlewares(Request $request): Request
+    {
+        $routeMiddlewares = app()->settings->app['routeAppMiddleware'];
+
+        foreach ($routeMiddlewares as $name => $class) {
+            $args = explode(':', $name);
+            $request = (new $class)->handle($request, $args[1] ?? null) ?? $request;
+        }
+
+        return $request;
     }
 }
