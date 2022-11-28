@@ -9,12 +9,12 @@ class Session
         $_SESSION[$name] = $value;
     }
 
-    public static function get($name): ?string
+    public static function get($name)
     {
         return $_SESSION[$name] ?? null;
     }
 
-    public static function clear($name): void
+    public static function clear($name)
     {
         unset($_SESSION[$name]);
     }

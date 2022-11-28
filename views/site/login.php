@@ -11,4 +11,4 @@ if (!app()->auth::check()):
         <label>Пароль <input type="password" name="password"></label>
         <button>Войти</button>
     </form>
-<?php endif; ?>
+<?php endif;

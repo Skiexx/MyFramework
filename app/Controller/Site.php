@@ -2,19 +2,20 @@
 
 namespace Controller;
 
-use Model\User;
-use Src\Validator\Validator;
+use Model\Post;
 use Src\View;
 use Src\Request;
+use Model\User;
 use Src\Auth\Auth;
-use Model\Post;
+use Src\Validator\Validator;
+
 
 class Site
 {
-    public function index(): string
+    public function index(Request $request): string
     {
-        $posts = Post::all();
-        return new View('site.posts', ['posts' => $posts]);
+        $posts = Post::where('id', $request->id ?? 0)->get();
+        return (new View())->render('site.post', ['posts' => $posts]);
     }
 
     public function hello(): string
@@ -35,13 +36,14 @@ class Site
                 'unique' => 'Поле :field должно быть уникально'
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return new View('site.signup',
                     ['message' => json_encode($validator->errors(), JSON_UNESCAPED_UNICODE)]);
             }
 
             if (User::create($request->all())) {
                 app()->route->redirect('/login');
+                return false;
             }
         }
         return new View('site.signup');
@@ -49,13 +51,16 @@ class Site
 
     public function login(Request $request): string
     {
+        //Если просто обращение к странице, то отобразить форму
         if ($request->method === 'GET') {
             return new View('site.login');
         }
+        //Если удалось аутентифицировать пользователя, то редирект
         if (Auth::attempt($request->all())) {
             app()->route->redirect('/hello');
         }
-        return new View('site.login', ['message' => 'Неверные логин или пароль']);
+        //Если аутентификация не удалась, то сообщение об ошибке
+        return new View('site.login', ['message' => 'Неправильные логин или пароль']);
     }
 
     public function logout(): void
