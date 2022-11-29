@@ -27,9 +27,9 @@ class Request
         $this->body[$field] = $value;
     }
 
-    public function get($field): string
+    public function get($field)
     {
-        return $this->body[$field] ?? '';
+        return $this->body[$field];
     }
 
     public function files(): array
